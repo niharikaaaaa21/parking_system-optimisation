@@ -1,0 +1,91 @@
+{% extends 'parking_optimizer/base.html' %}
+{% load math_filters %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header bg-primary text-white">
+        <h3>Optimize Parking Allocation for "{{ config.name }}"</h3>
+    </div>
+    <div class="card-body">
+        <h4>Configuration Details</h4>
+        <table class="table table-striped">
+            <tr>
+                <th>Total Spaces:</th>
+                <td>{{ config.total_spaces }}</td>
+            </tr>
+            <tr>
+                <th>Minimum Hourly Spaces:</th>
+                <td>{{ config.min_hourly_spaces }}</td>
+            </tr>
+            <tr>
+                <th>Required Occupancy Rate:</th>
+                <td>{{ config.occupancy_requirement|floatformat:2 }} ({{ config.occupancy_requirement|mul:100|floatformat:2 }}%)</td>
+            </tr>
+        </table>
+        
+        <h4>Revenue Parameters</h4>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Parking Type</th>
+                    <th>Daily Revenue</th>
+                    <th>Occupancy Rate</th>
+                    <th>Expected Revenue per Space</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Hourly</td>
+                    <td>${{ config.hourly_revenue|floatformat:2 }}</td>
+                    <td>{{ config.hourly_reliability|floatformat:2 }} ({{ config.hourly_reliability|mul:100|floatformat:2 }}%)</td>
+                    <td>${{ config.hourly_revenue|mul:config.hourly_reliability|floatformat:2 }}</td>
+                </tr>
+                <tr>
+                    <td>Monthly</td>
+                    <td>${{ config.monthly_revenue|floatformat:2 }}</td>
+                    <td>{{ config.monthly_reliability|floatformat:2 }} ({{ config.monthly_reliability|mul:100|floatformat:2 }}%)</td>
+                    <td>${{ config.monthly_revenue|mul:config.monthly_reliability|floatformat:2 }}</td>
+                </tr>
+                <tr>
+                    <td>Corporate</td>
+                    <td>${{ config.corporate_revenue|floatformat:2 }}</td>
+                    <td>{{ config.corporate_reliability|floatformat:2 }} ({{ config.corporate_reliability|mul:100|floatformat:2 }}%)</td>
+                    <td>${{ config.corporate_revenue|mul:config.corporate_reliability|floatformat:2 }}</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <div class="alert alert-info">
+            <p><strong>Optimization Problem:</strong></p>
+            <p>
+                Maximize: ${{ config.hourly_revenue }} × {{ config.hourly_reliability }} × Hourly Spaces + 
+                ${{ config.monthly_revenue }} × {{ config.monthly_reliability }} × Monthly Spaces + 
+                ${{ config.corporate_revenue }} × {{ config.corporate_reliability }} × Corporate Spaces
+            </p>
+            <p><strong>Subject to:</strong></p>
+            <ul>
+                <li>Hourly Spaces + Monthly Spaces + Corporate Spaces ≤ {{ config.total_spaces }}</li>
+                <li>Hourly Spaces ≥ {{ config.min_hourly_spaces }}</li>
+                <li>{{ config.hourly_reliability }} × Hourly Spaces + {{ config.monthly_reliability }} × Monthly Spaces + {{ config.corporate_reliability }} × Corporate Spaces ≥ {{ config.occupancy_requirement }} × {{ config.total_spaces }}</li>
+                <li>All space allocations ≥ 0</li>
+            </ul>
+        </div>
+        
+        <form method="POST" class="text-center mt-4">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-lg btn-success">
+                <i class="fas fa-cogs"></i> Run Optimization
+            </button>
+        </form>
+    </div>
+</div>
+
+<div class="mt-3">
+    <a href="{% url 'edit_config' config.id %}" class="btn btn-warning">
+        <i class="fas fa-edit"></i> Edit Configuration
+    </a>
+    <a href="{% url 'home' %}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Back to Home
+    </a>
+</div>
+{% endblock %}

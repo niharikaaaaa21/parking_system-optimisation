@@ -1,0 +1,31 @@
+{% extends 'parking_optimizer/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header bg-warning">
+        <h3>Edit Configuration: "{{ config.name }}"</h3>
+    </div>
+    <div class="card-body">
+        <form method="POST">
+            {% csrf_token %}
+            {{ form|crispy }}
+            
+            <div class="alert alert-warning mt-3">
+                <i class="fas fa-exclamation-triangle"></i> 
+                <strong>Note:</strong> Editing this configuration will reset any existing optimization results.
+                You'll need to re-optimize after saving these changes.
+            </div>
+            
+            <div class="mt-3">
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-save"></i> Save Changes
+                </button>
+                <a href="{% url 'home' %}" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

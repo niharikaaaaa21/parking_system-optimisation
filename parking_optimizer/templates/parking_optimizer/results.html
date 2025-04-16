@@ -1,0 +1,124 @@
+{% extends 'parking_optimizer/base.html' %}
+{% load math_filters %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header bg-success text-white">
+        <h3>Optimization Results for "{{ config.name }}"</h3>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="chart-container">
+                    <h4 class="text-center">Space Allocation</h4>
+                    <img src="data:image/png;base64,{{ pie_chart }}" class="img-fluid" alt="Parking Space Allocation">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="chart-container">
+                    <h4 class="text-center">Daily Revenue Breakdown</h4>
+                    <img src="data:image/png;base64,{{ revenue_chart }}" class="img-fluid" alt="Revenue Breakdown">
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <h4>Optimal Allocation</h4>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Parking Type</th>
+                            <th>Number of Spaces</th>
+                            <th>Percentage of Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Hourly</td>
+                            <td>{{ config.hourly_spaces }}</td>
+                            <td>{{ config.hourly_spaces|div:config.total_spaces|mul:100|floatformat:1 }}%</td>
+                        </tr>
+                        <tr>
+                            <td>Monthly</td>
+                            <td>{{ config.monthly_spaces }}</td>
+                            <td>{{ config.monthly_spaces|div:config.total_spaces|mul:100|floatformat:1 }}%</td>
+                        </tr>
+                        <tr>
+                            <td>Corporate</td>
+                            <td>{{ config.corporate_spaces }}</td>
+                            <td>{{ config.corporate_spaces|div:config.total_spaces|mul:100|floatformat:1 }}%</td>
+                        </tr>
+                        <tr class="table-dark">
+                            <th>Total</th>
+                            <th>{{ config.total_spaces }}</th>
+                            <th>100%</th>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h4>Revenue Summary</h4>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-striped">
+                            <tr>
+                                <th>Expected Daily Revenue:</th>
+                                <td>${{ config.expected_revenue|floatformat:2 }}</td>
+                            </tr>
+                            <tr>
+                                <th>Expected Monthly Revenue:</th>
+                                <td>${{ config.expected_revenue|mul:30|floatformat:2 }}</td>
+                            </tr>
+                            <tr>
+                                <th>Expected Annual Revenue:</th>
+                                <td>${{ config.expected_revenue|mul:365|floatformat:2 }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h4>Occupancy Statistics</h4>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-striped">
+                            <tr>
+                                <th>Required Occupancy Rate:</th>
+                                <td>{{ config.occupancy_requirement|mul:100|floatformat:1 }}%</td>
+                            </tr>
+                            <tr>
+                                <th>Expected Occupancy Rate:</th>
+                                <td>{{ config.expected_occupancy|mul:100|floatformat:1 }}%</td>
+                            </tr>
+                            <tr>
+                                <th>Expected Spaces Filled:</th>
+                                <td>{{ config.expected_occupancy|mul:config.total_spaces|floatformat:0 }} of {{ config.total_spaces }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mt-3">
+    <a href="{% url 'optimize' config.id %}" class="btn btn-primary">
+        <i class="fas fa-sync-alt"></i> Re-Optimize
+    </a>
+    <a href="{% url 'edit_config' config.id %}" class="btn btn-warning">
+        <i class="fas fa-edit"></i> Edit Configuration
+    </a>
+    <a href="{% url 'home' %}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Back to Home
+    </a>
+</div>
+{% endblock %}

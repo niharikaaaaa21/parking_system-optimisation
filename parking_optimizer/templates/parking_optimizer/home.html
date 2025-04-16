@@ -1,0 +1,72 @@
+{% extends 'parking_optimizer/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h3>Create New Configuration</h3>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                    <button type="submit" class="btn btn-primary mt-3">Create Configuration</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="info-box">
+            <h3>About Parking Optimization</h3>
+            <p>This application helps optimize parking space allocation between hourly, monthly, and corporate parking to maximize revenue while meeting occupancy requirements.</p>
+            <p>The system uses linear programming techniques to find the optimal allocation based on the parameters you provide.</p>
+        </div>
+        
+        <div class="card">
+            <div class="card-header bg-secondary text-white">
+                <h3>Existing Configurations</h3>
+            </div>
+            <div class="card-body">
+                {% if configurations %}
+                    <div class="list-group">
+                        {% for config in configurations %}
+                            <div class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h5 class="mb-1">{{ config.name }}</h5>
+                                    <small>{{ config.date_created|date:"M d, Y" }}</small>
+                                </div>
+                                <p class="mb-1">Total spaces: {{ config.total_spaces }}</p>
+                                
+                                <div class="btn-group mt-2" role="group">
+                                    {% if config.hourly_spaces %}
+                                        <a href="{% url 'results' config.id %}" class="btn btn-sm btn-success">
+                                            <i class="fas fa-chart-pie"></i> View Results
+                                        </a>
+                                    {% else %}
+                                        <a href="{% url 'optimize' config.id %}" class="btn btn-sm btn-primary">
+                                            <i class="fas fa-cogs"></i> Optimize
+                                        </a>
+                                    {% endif %}
+                                    
+                                    <a href="{% url 'edit_config' config.id %}" class="btn btn-sm btn-warning">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </a>
+                                    
+                                    <a href="{% url 'delete_config' config.id %}" class="btn btn-sm btn-danger">
+                                        <i class="fas fa-trash-alt"></i> Delete
+                                    </a>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p>No configurations yet. Create one to get started!</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
